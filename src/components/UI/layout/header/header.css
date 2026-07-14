@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "@heroui/styles";
+
+:root {
+	--background: #0D1117;
+	--surface: #161B22;
+	--primary: #58A6FF;
+	--primary-hover: #1F6FEB;
+	--text: #edeff2;
+	--header: #161B22;
+}
