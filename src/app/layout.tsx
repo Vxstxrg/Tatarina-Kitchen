@@ -8,7 +8,7 @@ import { siteConfig } from "@/config/site.config";
 import { layoutConfig } from '@/config/layout.config';
 import { auth } from "@/auth/auth";
 import { SessionProvider } from "next-auth/react";
-
+import  AppLoader  from "@/hoc/app-loader";
 const geistSans = Geist({
 	variable: "--font-geist-sans",
 	subsets: ["latin"],
@@ -39,13 +39,16 @@ export default async function RootLayout({
 
 				<Provider>
 					<SessionProvider session={session}>
-						<Header />
-						<main className="flex-1 w-full">
-							{children}
-						</main>
-						<footer className={`bg-[${layoutConfig.footer.backgroundColor}] text-[${layoutConfig.footer.textColor}] h-[${layoutConfig.footer.height}] flex justify-center items-center `}>
-							<p>{siteConfig.description}</p>
-						</footer>
+						<AppLoader>
+							<Header />
+							<main className="flex-1 w-full">
+								{children}
+							</main>
+
+							<footer className={`bg-[${layoutConfig.footer.backgroundColor}] text-[${layoutConfig.footer.textColor}] h-[${layoutConfig.footer.height}] flex justify-center items-center `}>
+								<p>{siteConfig.description}</p>
+							</footer>
+						</AppLoader>
 					</SessionProvider>
 				</Provider>
 

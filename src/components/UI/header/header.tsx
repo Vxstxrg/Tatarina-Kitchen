@@ -10,7 +10,7 @@ import RegistrationModal from "@/components/UI/modals/registration.modal";
 import LoginModal from "@/components/UI/modals/login.modal";
 import { useState } from "react";
 import {signOutFunc} from "@/actions/sign-out";
-import { useSession } from "next-auth/react";
+import { useAuthStore } from "@/store/auth.store";
 
 
 export const Logo = () => {
@@ -22,9 +22,11 @@ export const Logo = () => {
 export default function Header() {
 
 	const pathname = usePathname();
-	const {data: session,status}  = useSession();
 
-	const isAuth = status === "authenticated";
+	const {isAuth, session,status, setAuthState} = useAuthStore();
+	
+
+
 
 	console.log('session', session);
 	console.log('status', status);
@@ -32,7 +34,15 @@ export default function Header() {
 	const [isLoginOpen, setIsLoginOpen] = useState(false);
 
 	const handleSignOut =  async () => {
-		await signOutFunc();
+		
+
+		try{
+			await signOutFunc();
+		} catch (error) {
+			console.error('Error signing out:', error);
+		}
+
+		setAuthState('unauthenticated', null);
 	}
 
 	const getNavItemClassName = () => {
@@ -75,7 +85,7 @@ export default function Header() {
 
 				<div className="flex items-center gap-3">
 					{isAuth && <p className='text-white'> Привет, {session?.user?.name || session?.user?.email}! </p>}
-					{!isAuth ?<> <Button
+					{status === 'loading' ?  <p className='text-white'>Загрузка...</p> : !isAuth ?<> <Button
 						variant="secondary"
 						className="min-w-24"
 						as={Link}
@@ -100,6 +110,8 @@ export default function Header() {
 
 					
 				</div>
+
+				
 			</div>
 
 
