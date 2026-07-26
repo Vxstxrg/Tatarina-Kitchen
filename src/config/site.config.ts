@@ -1,11 +1,52 @@
 
 export const siteConfig = {
-  title: "Татарская кухня",
-  description: "A simple recipe website for Tatarian cuisine",
-  url: "https://tatarian-kitchen.vercel.app",
-  navItems: [
-    { label: "Рецепты", href: "/" },
-    { label: "Ингредиенты", href: "/ingredients" },
-    { label: "О нас", href: "/about" },
-  ],
+	title: "Татарская кухня",
+	description: "A simple recipe website for Tatarian cuisine",
+	url: "https://tatarian-kitchen.vercel.app",
+	navItems: [
+		{ label: "Рецепты", href: "/" },
+		{ label: "Ингредиенты", href: "/ingredients" },
+		{ label: "О нас", href: "/about" },
+	],
+	pageContent: {
+		"/": {
+			content: "Здесь рецепты"
+		},
+		"/ingredients": {
+			content: "Здесь ингредиенты"
+		},
+		"/about": {
+			content: `<p>
+			Татарская кухня – это яркое сочетание сытных мясных блюд, ароматной выпечки
+			и нежных молочных продуктов, отражающее богатую историю и гостеприимство
+			татарского народа.
+</p>
+
+<h2>Главные блюда татарской кухни</h2>
+<ul>
+  <li>
+    <strong>Эчпочмак</strong> - треугольные пирожки с начинкой из рубленого мяса,
+    картофеля и лука. Перед выпечкой в середину добавляют бульон.
+  </li>
+  <li>
+    <strong>Бэлиш</strong> - большой пирог с уткой, говядиной или курицей,
+    смешанными с картофелем и луком. Праздничное блюдо.
+  </li>
+  <li>
+    <strong>Чак-чак</strong> - обжаренные в меду шарики теста. Традиционное
+    угощение на торжествах.
+  </li>
+  <li>
+    <strong>Кыстыбый</strong> - тонкие лепешки с начинкой из картофельного
+    пюре или пшенной каши.
+  </li>
+  <li>
+    <strong>Шулпа</strong> - наваристый суп с мясом, картофелем и домашней лапшой.
+  </li>
+</ul>
+
+
+			`
+		}
+	}
 };

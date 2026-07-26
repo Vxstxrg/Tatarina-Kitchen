@@ -1,10 +1,17 @@
-const IngredientsPage = (  ) => {
+import IngredientForm from "@/forms/ingredient.form";
+
+const IngredientsPage = () => {
 	return (
-		<div>
-			<h1 className="text-3xl font-bold text-center mt-8 text-[var(--text)]">
-				Ингредиенты
+		<div className="min-h-screen flex flex-col items-center overflow-y-hidden">
+			<h1 className="mt-8 text-3xl font-bold text-[var(--text)]">
+				Добавление ингредиента
 			</h1>
+
+			<div className="mt-8 flex w-full justify-center">
+				<IngredientForm />
+			</div>
 		</div>
 	);
-}
+};
+
 export default IngredientsPage;

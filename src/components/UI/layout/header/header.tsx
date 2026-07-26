@@ -9,7 +9,7 @@ import { layoutConfig } from '@/config/layout.config';
 import RegistrationModal from "@/components/UI/modals/registration.modal";
 import LoginModal from "@/components/UI/modals/login.modal";
 import { useState } from "react";
-import {signOutFunc} from "@/actions/sign-out";
+import { signOutFunc } from "@/actions/sign-out";
 import { useAuthStore } from "@/store/auth.store";
 
 
@@ -23,8 +23,8 @@ export default function Header() {
 
 	const pathname = usePathname();
 
-	const {isAuth, session,status, setAuthState} = useAuthStore();
-	
+	const { isAuth, session, status, setAuthState } = useAuthStore();
+
 
 
 
@@ -33,10 +33,10 @@ export default function Header() {
 	const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 	const [isLoginOpen, setIsLoginOpen] = useState(false);
 
-	const handleSignOut =  async () => {
-		
+	const handleSignOut = async () => {
 
-		try{
+
+		try {
 			await signOutFunc();
 		} catch (error) {
 			console.error('Error signing out:', error);
@@ -66,8 +66,13 @@ export default function Header() {
 
 
 	return (
-		<nav className={`h-[${layoutConfig.header.height}] bg-[${layoutConfig.header.backgroundColor}]`}>
-			<div className="mx-auto relative flex h-full max-w-7xl items-center justify-between gap-6 px-6 --text">
+		<nav
+			style={{
+				height: layoutConfig.header.height,
+				backgroundColor: layoutConfig.header.backgroundColor,
+			}}
+		>
+			<div className="w-full max-w-[1024px] mx-auto h-full flex items-center justify-between gap-6 px-6 relative">
 				<Link href="/" className="flex h-full items-center text-xl font-bold">
 					<div className="flex items-center justify-center gap-3">
 						<Logo />
@@ -85,7 +90,7 @@ export default function Header() {
 
 				<div className="flex items-center gap-3">
 					{isAuth && <p className='text-white'> Привет, {session?.user?.name || session?.user?.email}! </p>}
-					{status === 'loading' ?  <p className='text-white'>Загрузка...</p> : !isAuth ?<> <Button
+					{status === 'loading' ? <p className='text-white'>Загрузка...</p> : !isAuth ? <> <Button
 						variant="secondary"
 						className="min-w-24"
 						as={Link}
@@ -93,25 +98,25 @@ export default function Header() {
 						onPress={() => setIsLoginOpen(true)}>
 						Логин
 					</Button>
-					<Button
-						color="primary"
-						className="min-w-24"
-						as={Link}
-						href="#"
-						onPress={() => setIsRegisterOpen(true)}>
-						Регистрация
+						<Button
+							color="primary"
+							className="min-w-24"
+							as={Link}
+							href="#"
+							onPress={() => setIsRegisterOpen(true)}>
+							Регистрация
 						</Button></> : <><Button
 							variant="secondary"
 							className="min-w-24"
 							onPress={handleSignOut}>
 							Выйти
 						</Button></>}
-					
 
-					
+
+
 				</div>
 
-				
+
 			</div>
 
 

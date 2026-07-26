@@ -1,9 +1,9 @@
+import PageContent from '@/components/common/page-content';
+
 const About = () => {
 	return (
 		<div>
-			<h1 className="text-3xl font-bold text-center mt-8 text-[var(--text)]">
-				О нас
-			</h1>
+			<PageContent></PageContent>
 		</div>
 	);
 }

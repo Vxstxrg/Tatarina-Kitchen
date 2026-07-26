@@ -66,7 +66,7 @@ export default function LoginForm({ onClose }: IProps) {
 
 		if (!validate()) return;
 		await signInWithCredentials(formData.email, formData.password);
-		
+
 		window.location.reload(); // Перезагрузка страницы после успешного входа
 		onClose();
 	};
