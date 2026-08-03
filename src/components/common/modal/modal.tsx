@@ -18,7 +18,7 @@
 		onClose: () => void;
 		title: string;
 		children: ReactNode;
-		size?: "xs" | "sm" | "md" | "lg" | "xl";
+		size?: "xs" | "sm" | "md" | "lg" | "cover" | "full";
 	}
 
 	const CustomModal = ({
@@ -48,7 +48,7 @@
 
 									<Button
 										isIconOnly
-										variant="light"
+										variant="ghost"
 										size="sm"
 										onPress={onClose}
 										aria-label="Закрыть"

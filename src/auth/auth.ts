@@ -8,11 +8,13 @@ import { signInSchema } from "@/schema/zod";
 import { getUserFromDb } from "@/utils/user";
 import { prisma } from "@/utils/prisma";
 
+const prismaAdapterClient = prisma as unknown as Parameters<typeof PrismaAdapter>[0];
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	// Временно оставь true, чтобы видеть ошибки в терминале.
 	debug: true,
 
-	adapter: PrismaAdapter(prisma),
+	adapter: PrismaAdapter(prismaAdapterClient),
 
 	secret: process.env.AUTH_SECRET,
 

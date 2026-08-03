@@ -148,20 +148,18 @@ const IngredientForm = () => {
 					key={`category-${formResetKey}`}
 					name="category"
 					placeholder="Категория"
-					selectedKeys={formData.category ? new Set([formData.category]) : new Set()}
+					selectedKey={formData.category || null}
 					isRequired
 					fullWidth
 					className="group flex flex-col"
 					isInvalid={Boolean(errors.category)}
-					errorMessage={errors.category}
 					validationBehavior="aria"
-					onSelectionChange={(keys) => {
-						if (!keys || keys === "all" || (keys instanceof Set && keys.size === 0)) {
+					onSelectionChange={(key) => {
+						if (!key) {
 							setFormData((prev) => ({ ...prev, category: "" }));
 							return;
 						}
-						const extractedArray = keys instanceof Set ? Array.from(keys) : [keys];
-						const selectedKey = String(extractedArray || "").trim();
+						const selectedKey = String(key).trim();
 						if (!selectedKey || selectedKey === "null" || selectedKey === "undefined") return;
 
 						setFormData((prev) => ({ ...prev, category: selectedKey }));
@@ -189,20 +187,18 @@ const IngredientForm = () => {
 					key={`unit-${formResetKey}`}
 					name="unit"
 					placeholder="Ед. измерения"
-					selectedKeys={formData.unit ? new Set([formData.unit]) : new Set()}
+					selectedKey={formData.unit || null}
 					isRequired
 					fullWidth
 					className="group flex flex-col"
 					isInvalid={Boolean(errors.unit)}
-					errorMessage={errors.unit}
 					validationBehavior="aria"
-					onSelectionChange={(keys) => {
-						if (!keys || keys === "all" || (keys instanceof Set && keys.size === 0)) {
+					onSelectionChange={(key) => {
+						if (!key) {
 							setFormData((prev) => ({ ...prev, unit: "" }));
 							return;
 						}
-						const extractedArray = keys instanceof Set ? Array.from(keys) : [keys];
-						const selectedKey = String(extractedArray || "").trim();
+						const selectedKey = String(key).trim();
 						if (!selectedKey || selectedKey === "null" || selectedKey === "undefined") return;
 
 						setFormData((prev) => ({ ...prev, unit: selectedKey }));

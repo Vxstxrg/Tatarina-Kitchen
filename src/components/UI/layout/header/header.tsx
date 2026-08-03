@@ -100,16 +100,12 @@ export default function Header() {
 					{status === 'loading' ? <p className='text-white'>Загрузка...</p> : !isAuth ? <> <Button
 						variant="secondary"
 						className="min-w-24"
-						as={Link}
-						href="#"
 						onPress={() => setIsLoginOpen(true)}>
 						Логин
 					</Button>
 						<Button
 							variant="primary"
 							className="min-w-24"
-							as={Link}
-							href="#"
 							onPress={() => setIsRegisterOpen(true)}>
 							Регистрация
 						</Button></> : <><Button

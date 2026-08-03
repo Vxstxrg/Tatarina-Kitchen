@@ -143,13 +143,11 @@ const RecipeForm = ({ initialRecipe }: RecipeFormProps) => {
 							isRequired
 							name={`ingredient_${index}`}
 							placeholder="Выберите ингредиент"
-							selectedKeys={field.ingredientId ? new Set([field.ingredientId]) : new Set()}
+							selectedKey={field.ingredientId || null}
 							className="w-full"
-							onSelectionChange={(keys) => {
-								if (keys instanceof Set && keys.size > 0) {
-									const selectedValue = Array.from(keys)[0];
-									handleIngredientChange(field.id, "ingredientId", String(selectedValue));
-								}
+							onSelectionChange={(key) => {
+								if (!key) return;
+								handleIngredientChange(field.id, "ingredientId", String(key));
 							}}
 						>
 							<Select.Trigger className="relative flex min-h-10 items-center px-4 bg-default-100 rounded-xl text-sm w-full">

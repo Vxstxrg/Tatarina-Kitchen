@@ -33,8 +33,7 @@ export async function signInWithCredentials(
 
 		// 2. Обработка ошибок Auth.js
 		if (error instanceof AuthError) {
-			// Проверяем тип ошибки или её код (в зависимости от суб-версий)
-			if (error.type === "CredentialsSignin" || error.code === "credentials") {
+			if (error.type === "CredentialsSignin") {
 				return {
 					success: false,
 					message: "Неверная почта или пароль",

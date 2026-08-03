@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import type { Session } from "next-auth";
-import type { SessionStatus } from "next-auth/react";
+
+type SessionStatus = "authenticated" | "unauthenticated" | "loading";
 
 interface AuthState {
 	isAuth: boolean;

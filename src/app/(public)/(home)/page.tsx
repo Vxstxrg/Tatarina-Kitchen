@@ -13,10 +13,9 @@ export default function Home() {
 		<>
 			{isAuth ? (
 				<div className='flex w-full justify-center items-center mb-4'>
-					{/* Оптимизированный синтаксис ссылки для HeroUI */}
-					<Button as={Link} href="/recipes/new" variant='primary'>
-						Добавить рецепт
-					</Button>
+					<Link href="/recipes/new">
+						<Button variant='primary'>Добавить рецепт</Button>
+					</Link>
 				</div>
 			) : (
 				<h1 className='text-center text-4xl font-bold !text-red-700 mb-6'>

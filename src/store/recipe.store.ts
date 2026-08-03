@@ -7,6 +7,9 @@ import {
 import { IRecipe } from '@/types/recipe';
 import { create } from 'zustand';
 
+const getErrorMessage = (value: unknown, fallback: string) =>
+	typeof value === "string" ? value : fallback;
+
 interface IActionResult {
 	success: boolean;
 	recipe?: IRecipe;
@@ -53,15 +56,16 @@ export const useRecipeStore = create<IRecipeState>((set) => ({
 
 		try {
 			const result = await createRecipe(formData);
-			if (result.success && result.recipe) {
+			if (result.success && result.data) {
 				set((state) => ({
-					recipes: [...state.recipes, result.recipe!],
+					recipes: [...state.recipes, result.data],
 					isLoading: false
 				}));
-				return { success: true, recipe: result.recipe };
+				return { success: true, recipe: result.data };
 			} else {
-				set({ error: result.error || "Не удалось добавить рецепт", isLoading: false });
-				return { success: false, error: result.error || "Не удалось добавить рецепт" };
+				const message = getErrorMessage(result.error, "Не удалось добавить рецепт");
+				set({ error: message, isLoading: false });
+				return { success: false, error: message };
 			}
 		} catch (error) {
 			console.error("error", error);
@@ -75,17 +79,18 @@ export const useRecipeStore = create<IRecipeState>((set) => ({
 
 		try {
 			const result = await updateRecipeAction(id, formData);
-			if (result.success && result.recipe) {
+			if (result.success && result.data) {
 				set((state) => ({
 					recipes: state.recipes.map((recipe) =>
-						recipe && recipe.id === id ? result.recipe! : recipe
+						recipe && recipe.id === id ? result.data : recipe
 					),
 					isLoading: false
 				}));
-				return { success: true, recipe: result.recipe };
+				return { success: true, recipe: result.data };
 			} else {
-				set({ error: result.error || "Не удалось обновить рецепт", isLoading: false });
-				return { success: false, error: result.error || "Не удалось обновить рецепт" };
+				const message = getErrorMessage(result.error, "Не удалось обновить рецепт");
+				set({ error: message, isLoading: false });
+				return { success: false, error: message };
 			}
 		} catch (error) {
 			console.error("error", error);

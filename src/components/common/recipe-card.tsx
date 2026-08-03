@@ -86,7 +86,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 			<div className="flex justify-end gap-2 p-4 border-t border-gray-800">
 				<Link href={`/recipes/${recipe.id}`}>
 					{/* Изменено: использование основного цвета темы для кнопки редактирования */}
-					<Button variant="flat" className="bg-[#21262d] text-[var(--primary)] hover:bg-[#30363d]">
+					<Button variant="ghost" className="bg-[#21262d] text-[var(--primary)] hover:bg-[#30363d]">
 						Редактировать
 					</Button>
 				</Link>
