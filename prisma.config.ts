@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config"; // Убрали импорт env
 
 export default defineConfig({
 	schema: "prisma/schema.prisma",
@@ -9,6 +9,7 @@ export default defineConfig({
 	},
 
 	datasource: {
-		url: env("DATABASE_URL"),
+		// Используем стандартный process.env вместо хелпера env()
+		url: process.env.DATABASE_URL || "postgresql://mock:mock@localhost:5432/mock",
 	},
 });

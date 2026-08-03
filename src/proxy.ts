@@ -1,6 +1,8 @@
 import { getToken } from 'next-auth/jwt';
 import { NextResponse, type NextRequest } from 'next/server';
-export async function middleware(request: NextRequest) {
+
+// 1. Изменили имя функции с middleware на proxy для Next.js 16
+export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	const token = await getToken({
 		req: request,
@@ -8,15 +10,17 @@ export async function middleware(request: NextRequest) {
 	});
 	const protectedRoutes = ["/ingredients", "/recipes/new", "/recipes/:path*"];
 
-	if (protectedRoutes.some((route) => pathname.startsWith(route.replace(":path","")))) {
+	if (protectedRoutes.some((route) => pathname.startsWith(route.replace(":path", "")))) {
 		if (!token) {
-			const url = new URL("/error", request.url);
+			// 2. Исправили формирование URL редиректа через безопасное клонирование nextUrl
+			const url = request.nextUrl.clone();
+			url.pathname = "/error";
 			url.searchParams.set("message", "Недостаточно прав");
 			return NextResponse.redirect(url);
 		}
 	}
 	return NextResponse.next();
-};
+}
 
 export const config = {
 	matcher: ["/ingredients", "/recipes/new", "/recipes/:path*"],
