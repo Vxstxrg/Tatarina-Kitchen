@@ -46,7 +46,14 @@ export default function Header() {
 	}
 
 	const getNavItemClassName = () => {
-		return (siteConfig.navItems.map((item) => {
+		return (siteConfig.navItems
+			.filter((item)=>{
+			if(item.href === "/ingredients"){
+				return isAuth;
+			}
+			return true;
+		})
+		.map((item) => {
 			const isActive = pathname === item.href;
 			return (
 				<Link
@@ -99,7 +106,7 @@ export default function Header() {
 						Логин
 					</Button>
 						<Button
-							color="primary"
+							variant="primary"
 							className="min-w-24"
 							as={Link}
 							href="#"

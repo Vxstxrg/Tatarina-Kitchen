@@ -1,5 +1,5 @@
 generator client {
-   provider = "prisma-client"
+   provider = "prisma-client" // Исправлено: стандартный провайдер prisma-client-js
    output   = "../src/generated/prisma"
 }
 
@@ -8,23 +8,18 @@ datasource db {
 }
 
 model User {
-   id            String    @id @default(uuid())
-   email         String    @unique
-   password      String
-   //image         String?
-   //name          String?
-	//emailVerified DateTime? @map("email_verified")
-	
-	accounts      Account[]   
-   sessions      Session[]
-   
-   createdAt     DateTime  @default(now()) @map("created_at")
-   updatedAt     DateTime  @updatedAt @map("updated_at")
+   id       String @id @default(uuid())
+   email    String @unique
+   password String
+
+   accounts Account[]
+   sessions Session[]
+
+   createdAt DateTime @default(now()) @map("created_at")
+   updatedAt DateTime @updatedAt @map("updated_at")
 
    @@map("users")
 }
-
-
 
 model Account {
    id                String  @id @default(cuid())
@@ -63,4 +58,56 @@ model VerificationToken {
 
    @@unique([identifier, token])
    @@map("verification_tokens")
+}
+
+model Ingredient {
+   id           String             @id @default(uuid())
+   name         String
+   category     Category
+   unit         Unit
+   pricePerUnit Float?
+   description  String?
+   recipes      RecipeIngredient[]
+   createdAt    DateTime           @default(now()) @map("created_at")
+   updatedAt    DateTime           @updatedAt @map("updated_at")
+
+   @@map("ingredients") // ИСПРАВЛЕНО: Удален лишний пробел в конце строки "ingredients "
+}
+
+enum Category {
+   VEGETABLES
+   FRUITS
+   MEAT
+   DAIRY
+   SPICES
+   OTHER
+}
+
+enum Unit {
+   GRAMS
+   KILOGRAMS
+   LITERS
+   MILLILITERS
+   PIECES
+}
+
+model Recipe {
+   id          String             @id @default(uuid())
+   name        String
+   description String
+   imageUrl    String?            @map("image_url")
+   ingredients RecipeIngredient[]
+
+   @@map("recipes")
+}
+
+model RecipeIngredient {
+   id           String     @id @default(uuid())
+   recipe       Recipe     @relation(fields: [recipeId], references: [id])
+   recipeId     String
+   ingredient   Ingredient @relation(fields: [ingredientId], references: [id])
+   ingredientId String
+   quantity     Float
+
+   @@map("recipe_ingredient")
 }

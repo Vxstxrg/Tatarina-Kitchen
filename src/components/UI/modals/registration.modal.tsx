@@ -1,5 +1,5 @@
 "use client"
-import CustomModal from '@/components/common/modal';
+import CustomModal from '@/components/common/modal/modal';
 import RegistrationForm from '@/forms/registration.form';
 
 interface IProps {

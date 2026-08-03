@@ -1,17 +1,25 @@
 export const CATEGORY_OPTIONS = [
-	{ value:"vegetables" , label:"Овощи"},
-	{ value:"fruits" , label:"Фрукты"},
-	{ value:"meat" , label:"Мясо"},
-	{value:"dairy" , label:"Молочные продукты"},
-	{ value:"spices" , label:"Специи"},
-	{ value:"other" , label:"Другое"},
+	{ label: "Овощи", value: "VEGETABLES" },
+	{ label: "Фрукты", value: "FRUITS" },
+	{ label: "Мясо", value: "MEAT" },
+	{ label: "Молочные продукты", value: "DAIRY" },
+	{ label: "Специи", value: "SPICES" },
+	{ label: "Другое", value: "OTHER" },
+] as const;
+
+export const UNIT_OPTIONS = [
+	{ label: "Граммы", value: "GRAMS" },
+	{ label: "Килограммы", value: "KILOGRAMS" },
+	{ label: "Литры", value: "LITERS" },
+	{ label: "Миллилитры", value: "MILLILITERS" },
+	{ label: "Штуки", value: "PIECES" },
 ] as const;
 
 
-export const UNIT_OPTIONS = [
-	{ value: "grams", label: "Граммы" },
-	{ value:"kilograms" , label:"Килограммы"},
-	{ value:"liters" , label:"Литры"},
-	{ value:"milliliters" , label:"Миллилитры"},
-	{ value: "pieces", label: "Штуки" },
-]
+export const UNIT_ABBREVIATIONS = [
+	{ value: "GRAMS", label: "г" },
+	{ value: "KILOGRAMS",  label: "кг"},
+	{ value: "LITERS", label: "л" },
+	{ value: "MILLILITERS", label: "мл" },
+	{ value: "PIECES", label: "шт" },
+] as const

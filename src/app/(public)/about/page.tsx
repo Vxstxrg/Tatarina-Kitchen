@@ -2,7 +2,7 @@ import PageContent from '@/components/common/page-content';
 
 const About = () => {
 	return (
-		<div>
+		<div className='mb-12'>
 			<PageContent></PageContent>
 		</div>
 	);

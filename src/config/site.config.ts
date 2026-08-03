@@ -7,6 +7,7 @@ export const siteConfig = {
 		{ label: "Рецепты", href: "/" },
 		{ label: "Ингредиенты", href: "/ingredients" },
 		{ label: "О нас", href: "/about" },
+		
 	],
 	pageContent: {
 		"/": {
