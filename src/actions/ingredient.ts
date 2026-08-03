@@ -2,7 +2,7 @@
 
 import { ingredientSchema } from "@/schema/zod";
 import { prisma } from "@/utils/prisma";
-import { success } from 'zod';
+// Убрали неверный импорт { success } из 'zod'
 
 export async function createIngredient(data: unknown) {
 	// 1. Логируем сырые данные, которые пришли с клиента
@@ -12,8 +12,8 @@ export async function createIngredient(data: unknown) {
 	const validation = ingredientSchema.safeParse(data);
 
 	if (!validation.success) {
-		// 3. Если ошибка, выводим МАКСИМАЛЬНО подробно в терминал сервера
-		console.error("❌ [SERVER] 2. Ошибка валидации Zod (сырая):", validation.error.errors);
+		// 3. Исправлено: заменено .errors на .issues для совместимости с Zod v4
+		console.error("❌ [SERVER] 2. Ошибка валидации Zod (сырая):", validation.error.issues);
 
 		const flattened = validation.error.flatten();
 		console.error("❌ [SERVER] 3. Ошибка валидации Zod (flattened):", flattened);
@@ -64,22 +64,19 @@ export async function getIngredients() {
 		const ingredients = await prisma.ingredient.findMany();
 		return { success: true, ingredients };
 	} catch (error) {
-		console.error("Ошибка получения ингрдиентов:", error);
-		return { error: "Ошибка получения ингрдиентов:" }
+		console.error("Ошибка получения ингредиентов:", error);
+		return { error: "Ошибка получения ингредиентов:" }
 	}
-
-};
+}
 
 export async function deleteIngredient(id: string) {
 	try {
 		const ingredient = await prisma.ingredient.delete({
-
 			where: { id }
-
 		});
 		return { success: true, ingredient };
 	} catch (error) {
-		console.error("Ошибка удаления ингрдиента:", error);
-		return { error: "Ошибка при удаления ингрдиента:" }
+		console.error("Ошибка удаления ингредиента:", error);
+		return { error: "Ошибка при удалении ингредиента:" }
 	}
 }

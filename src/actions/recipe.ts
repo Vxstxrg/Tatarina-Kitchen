@@ -4,7 +4,6 @@ import { prisma } from '@/utils/prisma';
 
 export async function getRecipes() {
 	try {
-
 		const recipes = await prisma.recipe.findMany({
 			include: {
 				ingredients: {
@@ -17,16 +16,15 @@ export async function getRecipes() {
 		return { success: true, recipes };
 	} catch (error) {
 		console.error("ошибка получение рецептов:", error);
-		return { success: false, error: "Ошибка при загрузке рецептов" }
+		return { success: false, error: "Ошибка при загрузке рецептов" };
 	}
-
-};
+}
 
 export async function createRecipe(formData: FormData) {
 	try {
 		const name = formData.get("name") as string;
 		const description = formData.get("description") as string;
-		const imageUrl = formData.get("imageUrl") as string | null
+		const imageUrl = formData.get("imageUrl") as string | null;
 
 		const ingredients = Array.from(formData.entries())
 			.filter(([key]) => key.startsWith("ingredient_"))
@@ -36,10 +34,6 @@ export async function createRecipe(formData: FormData) {
 					formData.get(`quantity_${key.split("_")[1]}`) as string,
 				)
 			}));
-
-
-
-
 
 		if (!name || ingredients.length === 0) {
 			return {
@@ -55,7 +49,8 @@ export async function createRecipe(formData: FormData) {
 				imageUrl,
 				ingredients: {
 					create: ingredients.map(({ ingredientId, quantity }) => ({
-						ingredient: { connect: { id: ingredientId } },
+						// Исправлено: связываем через прямой ID промежуточной таблицы
+						ingredientId,
 						quantity
 					}))
 				}
@@ -72,17 +67,15 @@ export async function createRecipe(formData: FormData) {
 		return { success: true, data: recipe };
 	} catch (error) {
 		console.error("Error creating recipe:", error);
-		return { success: false, error: "Ошибка при создантт" }
+		return { success: false, error: "Ошибка при создании рецепта" };
 	}
-};
-
+}
 
 export async function updateRecipe(id: string, formData: FormData) {
-
 	try {
 		const name = formData.get("name") as string;
 		const description = formData.get("description") as string;
-		const imageUrl = formData.get("imageUrl") as string | null
+		const imageUrl = formData.get("imageUrl") as string | null;
 
 		const ingredients = Array.from(formData.entries())
 			.filter(([key]) => key.startsWith("ingredient_"))
@@ -109,7 +102,8 @@ export async function updateRecipe(id: string, formData: FormData) {
 				ingredients: {
 					deleteMany: {},
 					create: ingredients.map(({ ingredientId, quantity }) => ({
-						ingredient: { connect: { id: ingredientId } },
+						// Исправлено: аналогично createRecipe
+						ingredientId,
 						quantity
 					}))
 				}
@@ -125,26 +119,26 @@ export async function updateRecipe(id: string, formData: FormData) {
 		return { success: true, data: recipe };
 	} catch (error) {
 		console.error("error updating recipe", error);
-		return { success: false, error: "Ошибка при обновлении рецепта" }
+		return { success: false, error: "Ошибка при обновлении рецепта" };
 	}
-};
-
+}
 
 export async function deleteRecipe(id: string) {
 	try {
+		// Очищаем связи в связующей таблице
 		await prisma.recipeIngredient.deleteMany({
 			where: { recipeId: id }
 		});
 
-
+		// Удаляем сам рецепт
 		await prisma.recipe.delete({
 			where: { id }
 		});
 
+		// Исправлено: добавлен обязательный возврат статуса операции
+		return { success: true };
 	} catch (error) {
 		console.error("Error deleting recipe", error);
-		return { success: false, error: "Ошибка при удалении рецепта" }
+		return { success: false, error: "Ошибка при удалении рецепта" };
 	}
 }
-
-

@@ -1,7 +1,6 @@
 "use server";
 
 import { AuthError } from "next-auth";
-
 import { signIn } from "@/auth/auth";
 
 interface SignInResult {
@@ -17,7 +16,7 @@ export async function signInWithCredentials(
 		await signIn("credentials", {
 			email,
 			password,
-			redirect: false,
+			redirect: false, // Оставляем false, но страхуем catch блок ниже
 		});
 
 		return {
@@ -25,10 +24,17 @@ export async function signInWithCredentials(
 			message: "Вы успешно вошли",
 		};
 	} catch (error) {
-		console.error("Ошибка авторизации:", error);
+		// 1. КРИТИЧНО ДЛЯ NEXT.JS 15/16: Не перехватываем системные редиректы Next.js
+		if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+			throw error;
+		}
 
+		console.error("❌ [SERVER] Ошибка авторизации:", error);
+
+		// 2. Обработка ошибок Auth.js
 		if (error instanceof AuthError) {
-			if (error.type === "CredentialsSignin") {
+			// Проверяем тип ошибки или её код (в зависимости от суб-версий)
+			if (error.type === "CredentialsSignin" || error.code === "credentials") {
 				return {
 					success: false,
 					message: "Неверная почта или пароль",
