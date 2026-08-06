@@ -1,15 +1,27 @@
-import "dotenv/config";
-import { defineConfig } from "prisma/config"; // Убрали импорт env
+import { PrismaClient } from "./src/generated/prisma/client"; // Импортируем прямо из файла client
+import { PrismaPg } from "@prisma/adapter-pg";
+import { withAccelerate } from "@prisma/extension-accelerate";
 
-export default defineConfig({
-	schema: "prisma/schema.prisma",
+const createExtendedClient = () => {
+	// Явно передаем URL из .env в конструктор, как этого требует Prisma 7 для Accelerate
+	const dbUrl = process.env.DATABASE_URL || "";
+	if (dbUrl.startsWith("prisma+")) {
+		// Prisma Accelerate URL
+		return new PrismaClient({ accelerateUrl: dbUrl }).$extends(withAccelerate());
+	}
 
-	migrations: {
-		path: "prisma/migrations",
-	},
+	const adapter = new PrismaPg({ connectionString: dbUrl });
+	return new PrismaClient({ adapter }).$extends(withAccelerate());
+};
 
-	datasource: {
-		// Используем стандартный process.env вместо хелпера env()
-		url: process.env.DATABASE_URL || "postgresql://mock:mock@localhost:5432/mock",
-	},
-});
+type ExtendedPrismaClient = ReturnType<typeof createExtendedClient>;
+
+const globalForPrisma = globalThis as unknown as {
+	prisma: ExtendedPrismaClient | undefined;
+};
+
+export const prisma = globalForPrisma.prisma ?? createExtendedClient();
+
+if (process.env.NODE_ENV !== "production") {
+	globalForPrisma.prisma = prisma;
+}
