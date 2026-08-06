@@ -1,15 +1,8 @@
+// Minimal prisma.config.ts for CI: don't import generated client here.
+// This file is loaded by Prisma CLI (db push/generate), so it must not depend on
+// generated artifacts. Load env variables only.
 import "dotenv/config";
-import { defineConfig } from "prisma/config"; // Убрали импорт env
 
-export default defineConfig({
-	schema: "prisma/schema.prisma",
-
-	migrations: {
-		path: "prisma/migrations",
-	},
-
-	datasource: {
-		// Используем стандартный process.env вместо хелпера env()
-		url: process.env.DATABASE_URL || "postgresql://mock:mock@localhost:5432/mock",
-	},
-});
+// Optionally export an empty config to satisfy module loading in environments
+// that attempt to `import` this file.
+export default {} as const;
