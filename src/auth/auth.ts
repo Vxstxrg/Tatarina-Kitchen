@@ -14,6 +14,7 @@ const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	// Временно оставь true, чтобы видеть ошибки в терминале.
 	debug: true,
+	trustHost: true,
 
 	adapter: PrismaAdapter(prismaAdapterClient),
 

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button, Input } from "@heroui/react";
 import { registerUser } from "@/actions/register";
+import { signInWithCredentials } from "@/actions/sign-in";
 
 interface IProps {
 	onClose: () => void;
@@ -28,6 +29,7 @@ export default function RegistrationForm({ onClose }: IProps) {
 	});
 
 	const [errors, setErrors] = useState<FormErrors>({});
+	const [serverError, setServerError] = useState<string | null>(null);
 	const inputErrorClassName =
 		"border border-red-500 bg-red-50 text-red-900 placeholder:text-red-400";
 
@@ -38,6 +40,7 @@ export default function RegistrationForm({ onClose }: IProps) {
 					...prev,
 					[field]: e.target.value,
 				}));
+				setServerError(null);
 
 				setErrors((prev) => ({
 					...prev,
@@ -75,12 +78,21 @@ export default function RegistrationForm({ onClose }: IProps) {
 		e.preventDefault();
 
 		if (!validate()) return;
-
-		console.log(formData);
+		setServerError(null);
 
 		const result = await registerUser(formData);
+		if (!result.success) {
+			setServerError(result.error || "Ошибка регистрации");
+			return;
+		}
 
-		console.log(result)
+		const signInResult = await signInWithCredentials(formData.email, formData.password);
+		if (!signInResult.success) {
+			setServerError(signInResult.message);
+			return;
+		}
+
+		window.location.reload();
 		onClose();
 	};
 
@@ -167,6 +179,7 @@ export default function RegistrationForm({ onClose }: IProps) {
 					Зарегистрироваться
 				</Button>
 			</div>
+			{serverError && <p className="text-sm text-red-500">{serverError}</p>}
 		</form>
 	);
 }
