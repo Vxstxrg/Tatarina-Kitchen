@@ -9,6 +9,7 @@ import { getUserFromDb } from "@/utils/user";
 import { prisma } from "@/utils/prisma";
 
 const prismaAdapterClient = prisma as unknown as Parameters<typeof PrismaAdapter>[0];
+const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
 	// Временно оставь true, чтобы видеть ошибки в терминале.
@@ -16,7 +17,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
 	adapter: PrismaAdapter(prismaAdapterClient),
 
-	secret: process.env.AUTH_SECRET,
+	secret: authSecret,
 
 	session: {
 		strategy: "jwt",

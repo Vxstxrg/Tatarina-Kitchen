@@ -23,6 +23,7 @@ export default function LoginForm({ onClose }: IProps) {
 		email: "",
 		password: "",
 	});
+	const [authError, setAuthError] = useState<string | null>(null);
 
 	const [errors, setErrors] = useState<LoginErrors>({});
 	const inputErrorClassName =
@@ -35,6 +36,7 @@ export default function LoginForm({ onClose }: IProps) {
 					...prev,
 					[field]: e.target.value,
 				}));
+				setAuthError(null);
 
 				// Убираем ошибку после изменения поля
 				setErrors((prev) => ({
@@ -65,9 +67,13 @@ export default function LoginForm({ onClose }: IProps) {
 		e.preventDefault();
 
 		if (!validate()) return;
-		await signInWithCredentials(formData.email, formData.password);
+		const result = await signInWithCredentials(formData.email, formData.password);
+		if (!result.success) {
+			setAuthError(result.message);
+			return;
+		}
 
-		window.location.reload(); // Перезагрузка страницы после успешного входа
+		window.location.reload();
 		onClose();
 	};
 
@@ -132,6 +138,7 @@ export default function LoginForm({ onClose }: IProps) {
 					Войти
 				</Button>
 			</div>
+			{authError && <p className="text-sm text-red-500">{authError}</p>}
 		</form>
 	);
 }

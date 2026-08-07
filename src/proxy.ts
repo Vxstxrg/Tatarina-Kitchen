@@ -4,9 +4,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 // 1. Изменили имя функции с middleware на proxy для Next.js 16
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
+	const authSecret = process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET;
 	const token = await getToken({
 		req: request,
-		secret: process.env.AUTH_SECRET,
+		secret: authSecret,
 	});
 	const protectedRoutes = ["/ingredients", "/recipes/new", "/recipes/:path*"];
 
