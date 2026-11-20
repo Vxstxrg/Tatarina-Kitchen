@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Установка зависимостей
+        run: npm ci
+
+      - name: Генерация Prisma-клиента
+        run: npx prisma generate
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Тесты
+        run: npm run test
+
+      - name: Сборка
+        run: npm run build
+        env:
+          # Сборка не обращается к БД, но Prisma и Auth.js требуют переменные
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/tatarian_kitchen?schema=public"
+          AUTH_SECRET: "ci-dummy-secret"
