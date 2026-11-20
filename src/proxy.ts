@@ -1,5 +1,7 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
-export async function proxy(_: NextRequest) {
+// Аналог middleware в Next.js 15 и ниже.
+// Сейчас сквозная логика не нужна — пропускаем все запросы как есть
+export function proxy() {
 	return NextResponse.next();
 }
