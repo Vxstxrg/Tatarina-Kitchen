@@ -1,0 +1,38 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tatarian_kitchen
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Порт наружу — для подключения Prisma Studio / psql с хоста
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d tatarian_kitchen"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      # Локальный Postgres из compose вместо Prisma Accelerate
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/tatarian_kitchen?schema=public
+      # Секрет сессий. Для продакшена задайте свой: `AUTH_SECRET=... docker compose up`
+      AUTH_SECRET: ${AUTH_SECRET:-dev-secret-change-me}
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      # 3000 на хосте часто занят, поэтому по умолчанию 3100.
+      # Переопределяется так: APP_PORT=3000 docker compose up
+      - "${APP_PORT:-3100}:3000"
+
+volumes:
+  pgdata:
