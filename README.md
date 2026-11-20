@@ -1,7 +1,11 @@
 # Татарская кухня 🍲
 
+[![CI](https://github.com/Vxstxrg/Tatarina-Kitchen/actions/workflows/ci.yml/badge.svg)](https://github.com/Vxstxrg/Tatarina-Kitchen/actions/workflows/ci.yml)
+
 Учебный fullstack-проект: сайт рецептов татарской кухни с авторизацией, каталогом
 ингредиентов и конструктором рецептов.
+
+![Каталог рецептов](public/screenshots/home.png)
 
 ## Стек
 
@@ -41,7 +45,10 @@ cp .env.example .env
 npx prisma generate
 npx prisma db push
 
-# 4. Запустить dev-сервер
+# 4. Наполнить базу демо-данными (ингредиенты и рецепты татарской кухни)
+npm run db:seed
+
+# 5. Запустить dev-сервер
 npm run dev
 ```
 
@@ -59,6 +66,18 @@ docker compose up --build
 Postgres доступен с хоста на порту 5433 (postgres/postgres). В контейнере приложение
 использует локальную базу из compose вместо Prisma Accelerate.
 
+### Деплой на Vercel
+
+1. Импортируйте репозиторий в [Vercel](https://vercel.com/new).
+2. Задайте переменные окружения в настройках проекта:
+   - `DATABASE_URL` — строка подключения (Prisma Accelerate, Neon или другая Postgres-БД);
+   - `AUTH_SECRET` — секрет сессий, сгенерируйте `openssl rand -base64 32`.
+3. Примените схему и демо-данные к облачной БД один раз с локальной машины:
+   `DATABASE_URL=<строка> npx prisma db push && DATABASE_URL=<строка> npm run db:seed`.
+
+CI (lint + typecheck + тесты + сборка) запускается автоматически на каждый пуш в `main`
+и на каждый pull request.
+
 ## Скрипты
 
 | Команда             | Действие                            |
@@ -69,6 +88,7 @@ Postgres доступен с хоста на порту 5433 (postgres/postgres)
 | `npm run lint`      | ESLint                              |
 | `npm run typecheck` | Проверка типов TypeScript           |
 | `npm run test`      | Юнит-тесты (Vitest)                 |
+| `npm run db:seed`   | Наполнение БД демо-данными          |
 
 ## Структура проекта
 
