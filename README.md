@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Татарская кухня 🍲
 
-## Getting Started
+Учебный fullstack-проект: сайт рецептов татарской кухни с авторизацией, каталогом
+ингредиентов и конструктором рецептов.
 
-First, run the development server:
+## Стек
+
+- **Next.js 16** (App Router, Server Actions) + **React 19** + **TypeScript**
+- **Prisma 7** + **PostgreSQL** (через драйверный адаптер `@prisma/adapter-pg` или Prisma Accelerate)
+- **Auth.js (next-auth v5)** — вход по email/паролю, JWT-сессии, хеширование bcrypt
+- **Zod** — единые схемы валидации на клиенте и сервере
+- **Zustand** — клиентское состояние
+- **HeroUI v3** + **Tailwind CSS 4** — UI-кит и стили
+- **Vitest** — юнит-тесты
+
+## Возможности
+
+- 🔐 Регистрация и вход по email/паролю; гостям рецепты доступны только для чтения
+- 👤 **Владение рецептами**: редактировать и удалять рецепт может только его автор — проверяется на сервере
+- 📖 Каталог рецептов с картинками, описанием и составом
+- ➕ Создание рецепта: до 10 ингредиентов из справочника с указанием количества
+- ✏️ Редактирование и удаление своих рецептов
+- 🥕 Справочник ингредиентов: категории, единицы измерения, цена за единицу
+- 🛡️ Все мутации на сервере проверяют сессию и права, данные валидируются через Zod —
+  скрытие кнопок в UI носит только косметический характер
+- 🩺 Health-check: `GET /api/health` (проверяет доступность БД)
+
+## Запуск
+
+Требуется Node.js 20+.
 
 ```bash
+# 1. Установить зависимости
+npm install
+
+# 2. Создать .env по образцу
+cp .env.example .env
+# заполнить DATABASE_URL и AUTH_SECRET
+
+# 3. Сгенерировать Prisma-клиент и применить схему к БД
+npx prisma generate
+npx prisma db push
+
+# 4. Запустить dev-сервер
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Приложение: <http://localhost:3000>
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Запуск через Docker
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Альтернатива без локального Node/Postgres — поднимает приложение и базу PostgreSQL:
 
-## Learn More
+```bash
+docker compose up --build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Приложение: <http://localhost:3100> (порт хоста меняется через `APP_PORT=3000 docker compose up`).
+Postgres доступен с хоста на порту 5433 (postgres/postgres). В контейнере приложение
+использует локальную базу из compose вместо Prisma Accelerate.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Скрипты
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Команда             | Действие                            |
+| ------------------- | ----------------------------------- |
+| `npm run dev`       | Dev-сервер                          |
+| `npm run build`     | Prisma generate + production-сборка |
+| `npm run start`     | Запуск production-сборки            |
+| `npm run lint`      | ESLint                              |
+| `npm run typecheck` | Проверка типов TypeScript           |
+| `npm run test`      | Юнит-тесты (Vitest)                 |
 
-## Deploy on Vercel
+## Структура проекта
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+prisma/            схема БД (User, Ingredient, Recipe, RecipeIngredient)
+src/
+  actions/         серверные экшены (CRUD рецептов/ингредиентов, auth)
+  app/             маршруты App Router: (public), (protected), api
+  auth/            конфигурация Auth.js
+  components/      UI- и обычные компоненты
+  config/          настройки сайта и layout
+  constants/       опции селектов (категории, единицы)
+  forms/           формы (логин, регистрация, рецепт, ингредиент)
+  generated/       сгенерированный Prisma-клиент (не редактировать)
+  schema/          zod-схемы валидации + тесты
+  store/           zustand-сторы
+  types/           общие типы
+  utils/           prisma-клиент, пароль, auth-guard + тесты
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Безопасность
+
+- Пароли хранятся как bcrypt-хеши (10 раундов)
+- Рецепты привязаны к автору: `updateRecipe`/`deleteRecipe` проверяют на сервере,
+  что текущий пользователь — владелец рецепта
+- Серверные экшены мутаций (`createRecipe`, `updateRecipe`, `deleteRecipe`,
+  `createIngredient`, `deleteIngredient`) отклоняют запросы без сессии
+- Входные данные валидируются Zod-схемами на сервере независимо от клиента
+- HTML-контент страниц санитизируется DOMPurify
+
+## Идеи для развития
+
+- Роли пользователей (admin/reader)
+- Пагинация и поиск по рецептам
+- Загрузка изображений вместо ссылки на URL
+- E2E-тесты (Playwright), CI с GitHub Actions
