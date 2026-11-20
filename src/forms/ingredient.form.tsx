@@ -97,20 +97,16 @@ const IngredientForm = () => {
 
 		const hasErrors = Object.values(newErrors).some((error) => error !== "");
 		if (hasErrors) {
-			console.log("❌ [CLIENT] Ошибки валидации, отмена отправки:", newErrors);
 			return;
 		}
 
 		startTransition(async () => {
-			await addIngredient(formData);
-			const storeError = useIngredientStore.getState().error;
+			const isCreated = await addIngredient(formData);
 
-			if (!storeError) {
+			if (isCreated) {
 				setFormData(initialState);
 				setErrors(initialErrorState);
 				setFormResetKey((prev) => prev + 1);
-			} else {
-				console.error("❌ Ошибки на сервере:", storeError);
 			}
 		});
 	};
@@ -120,7 +116,7 @@ const IngredientForm = () => {
 			onSubmit={handleSubmit}
 			className="flex w-full max-w-full flex-col gap-6"
 		>
-			{/* Поле Название с черной границей border-black */}
+			{/* Поле Название */}
 			<TextField
 				isRequired
 				isInvalid={Boolean(errors.name)}
@@ -135,7 +131,7 @@ const IngredientForm = () => {
 					placeholder="Введите название ингредиента"
 					value={formData.name}
 					onChange={handleNameChange}
-					className="min-h-14 px-4 text-base border border-black rounded-xl transition-colors bg-transparent group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500"
+					className="min-h-14 px-4 text-base border border-[var(--border)] rounded-xl transition-colors bg-[var(--surface)] hover:border-[#3d444d] focus:border-[var(--primary)] focus:outline-none text-[var(--text)] placeholder:text-[var(--text-muted)] group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500"
 				/>
 				<FieldError className="text-red-500 text-sm mt-1">{errors.name}</FieldError>
 			</TextField>
@@ -143,7 +139,7 @@ const IngredientForm = () => {
 			{/* Сетка заменена на grid для исключения горизонтального скролла */}
 			<div className="grid grid-cols-3 gap-4 w-full">
 
-				{/* Категория с черной границей border-black */}
+				{/* Категория */}
 				<Select
 					key={`category-${formResetKey}`}
 					name="category"
@@ -167,11 +163,11 @@ const IngredientForm = () => {
 					}}
 					isDisabled={isPending}
 				>
-					<Select.Trigger className="relative flex min-h-14 items-center justify-center px-4 border border-black rounded-xl transition-colors bg-transparent group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500">
+					<Select.Trigger className="relative flex min-h-14 items-center justify-center px-4 border border-[var(--border)] rounded-xl transition-colors bg-[var(--surface)] hover:border-[#3d444d] focus:border-[var(--primary)] focus:outline-none text-[var(--text)] placeholder:text-[var(--text-muted)] group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500">
 						<Select.Value className="w-full text-current" />
 						<Select.Indicator className="absolute right-4" />
 					</Select.Trigger>
-					<Select.Popover className="border border-black bg-white rounded-xl">
+					<Select.Popover className="border border-[var(--border)] bg-[var(--surface)] rounded-xl text-[var(--text)]">
 						<ListBox>
 							{CATEGORY_OPTIONS.map((option) => (
 								<ListBox.Item id={option.value} key={option.value} textValue={option.label}>
@@ -182,7 +178,7 @@ const IngredientForm = () => {
 					</Select.Popover>
 				</Select>
 
-				{/* Ед. Измерения с черной границей border-black */}
+				{/* Ед. Измерения */}
 				<Select
 					key={`unit-${formResetKey}`}
 					name="unit"
@@ -206,11 +202,11 @@ const IngredientForm = () => {
 					}}
 					isDisabled={isPending}
 				>
-					<Select.Trigger className="relative flex min-h-14 items-center justify-center px-4 border border-black rounded-xl transition-colors bg-transparent group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500">
+					<Select.Trigger className="relative flex min-h-14 items-center justify-center px-4 border border-[var(--border)] rounded-xl transition-colors bg-[var(--surface)] hover:border-[#3d444d] focus:border-[var(--primary)] focus:outline-none text-[var(--text)] placeholder:text-[var(--text-muted)] group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500">
 						<Select.Value className="w-full text-current" />
 						<Select.Indicator className="absolute right-4" />
 					</Select.Trigger>
-					<Select.Popover className="border border-black bg-white rounded-xl">
+					<Select.Popover className="border border-[var(--border)] bg-[var(--surface)] rounded-xl text-[var(--text)]">
 						<ListBox>
 							{UNIT_OPTIONS.map((option) => (
 								<ListBox.Item id={option.value} key={option.value} textValue={option.label}>
@@ -221,7 +217,7 @@ const IngredientForm = () => {
 					</Select.Popover>
 				</Select>
 
-				{/* Цена с черной границей border-black */}
+				{/* Цена */}
 				<TextField
 					isRequired
 					isInvalid={Boolean(errors.pricePerUnit)}
@@ -239,15 +235,15 @@ const IngredientForm = () => {
 							placeholder="Цена"
 							value={formData.pricePerUnit === null ? "" : String(formData.pricePerUnit)}
 							onChange={handlePriceChange}
-							className="min-h-14 w-full pr-10 border border-black rounded-xl transition-colors bg-transparent group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+							className="min-h-14 w-full pr-10 border border-[var(--border)] rounded-xl transition-colors bg-[var(--surface)] hover:border-[#3d444d] focus:border-[var(--primary)] focus:outline-none text-[var(--text)] placeholder:text-[var(--text-muted)] group-data-[invalid=true]:border-red-500 group-data-[invalid=true]:text-red-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
 						/>
-						<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">₽</span>
+						<span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">₽</span>
 					</div>
 					<FieldError className="text-red-500 text-sm mt-1">{errors.pricePerUnit}</FieldError>
 				</TextField>
 			</div>
 
-			{/* Поле Описание с черной границей border-black */}
+			{/* Поле Описание */}
 			<TextField
 				fullWidth
 				isDisabled={isPending}
@@ -258,7 +254,7 @@ const IngredientForm = () => {
 					placeholder="Описание ингредиента (необязательно)"
 					value={formData.description}
 					onChange={handleDescriptionChange}
-					className="min-h-24 p-4 text-base border border-black rounded-xl bg-transparent transition-colors resize-none"
+					className="min-h-24 p-4 text-base border border-[var(--border)] rounded-xl bg-[var(--surface)] text-[var(--text)] placeholder:text-[var(--text-muted)] hover:border-[#3d444d] focus:border-[var(--primary)] focus:outline-none transition-colors resize-none"
 				/>
 			</TextField>
 
@@ -266,7 +262,8 @@ const IngredientForm = () => {
 			<Button
 				type="submit"
 				isDisabled={isPending}
-				className="min-h-12 px-6 bg-black text-white hover:bg-gray-800 self-end	 rounded-xl font-medium"
+				variant="primary"
+			className="min-h-12 px-6 self-end rounded-xl font-medium"
 			>
 				{isPending ? "Добавление..." : "Добавить ингредиент"}
 			</Button>

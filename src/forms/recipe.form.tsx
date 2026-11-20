@@ -99,13 +99,13 @@ const RecipeForm = ({ initialRecipe }: RecipeFormProps) => {
 	};
 
 	return (
-		<Form className="w-[450px] flex flex-col gap-4" action={handleSubmit}>
+		<Form className="w-full max-w-[450px] flex flex-col gap-4" action={handleSubmit}>
 			{error && <p className="text-red-500 mb-2">{error}</p>}
 
 			<TextField 
 				isRequired 
 				name="name" 
-				className="w-full bg-default-100 rounded-xl"
+				className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)] placeholder:text-[var(--text-muted)]"
 				validate={(value) => (!value ? "Название обязательно" : null)}
 			>
 				<Input
@@ -117,7 +117,7 @@ const RecipeForm = ({ initialRecipe }: RecipeFormProps) => {
 				<FieldError className="text-red-500 text-xs mt-1" />
 			</TextField>
 
-			<TextField name="description" className="w-full bg-default-100 rounded-xl">
+			<TextField name="description" className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)] placeholder:text-[var(--text-muted)]">
 				<Input
 					placeholder="Введите описание (необязательно)"
 					type="text"
@@ -126,7 +126,7 @@ const RecipeForm = ({ initialRecipe }: RecipeFormProps) => {
 				/>
 			</TextField>
 
-			<TextField name="imageUrl" className="w-full bg-default-100 rounded-xl">
+			<TextField name="imageUrl" className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)] placeholder:text-[var(--text-muted)]">
 				<Input
 					placeholder="URL изображения (необязательно)"
 					type="url"
@@ -150,14 +150,14 @@ const RecipeForm = ({ initialRecipe }: RecipeFormProps) => {
 								handleIngredientChange(field.id, "ingredientId", String(key));
 							}}
 						>
-							<Select.Trigger className="relative flex min-h-10 items-center px-4 bg-default-100 rounded-xl text-sm w-full">
+							<Select.Trigger className="relative flex min-h-10 items-center px-4 bg-[var(--surface)] border border-[var(--border)] rounded-xl text-sm w-full hover:border-[#3d444d]">
 								<Select.Value className="w-full text-left truncate" />
-								<Select.Indicator className="absolute right-4 text-black" />
+								<Select.Indicator className="absolute right-4 text-[var(--text-muted)]" />
 							</Select.Trigger>
-							<Select.Popover className="bg-white border border-default-200 rounded-xl">
+							<Select.Popover className="bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)]">
 								<ListBox>
 									{ingredients.map((ingredient) => (
-										<ListBoxItem id={ingredient.id} key={ingredient.id} textValue={ingredient.name} className="text-black">
+										<ListBoxItem id={ingredient.id} key={ingredient.id} textValue={ingredient.name} className="text-[var(--text)] hover:bg-[var(--surface-hover)]">
 											{ingredient.name}
 										</ListBoxItem>
 									))}
@@ -168,7 +168,7 @@ const RecipeForm = ({ initialRecipe }: RecipeFormProps) => {
 						<TextField
 							isRequired
 							name={`quantity_${index}`}
-							className="w-[120px] bg-default-100 rounded-xl"
+							className="w-[120px] bg-[var(--surface)] border border-[var(--border)] rounded-xl text-[var(--text)] placeholder:text-[var(--text-muted)]"
 							validate={(value) =>
 								!value || parseFloat(value) <= 0
 									? "Должно быть > 0"

@@ -3,6 +3,7 @@
 import { IRecipe } from '@/types/recipe';
 import { Card, Button } from "@heroui/react";
 import { useRecipeStore } from '@/store/recipe.store';
+import { useAuthStore } from '@/store/auth.store';
 import Link from 'next/link';
 import { useTransition } from 'react';
 import Image from 'next/image';
@@ -14,7 +15,13 @@ interface RecipeCardProps {
 
 const RecipeCard = ({ recipe }: RecipeCardProps) => {
 	const { removeRecipe } = useRecipeStore();
+	const { session } = useAuthStore();
 	const [isPending, startTransition] = useTransition();
+
+	// Редактировать и удалять рецепт может только его автор
+	const isOwner = Boolean(
+		session?.user?.id && recipe.authorId === session.user.id,
+	);
 
 	const handleDelete = () => {
 		startTransition(async () => {
@@ -35,11 +42,11 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 
 	return (
 		// Изменено: bg-[var(--surface)] вместо стандартного белого фона карточки
-		<Card className="w-full max-w-md h-[480px] flex flex-col bg-[var(--surface)] border border-gray-800 rounded-xl shadow-lg ">
+		<Card className="w-full max-w-md h-[480px] flex flex-col bg-[var(--surface)] border border-[var(--border)] rounded-xl shadow-lg ">
 			{/* Изображение рецепта */}
 			<div className="h-48 overflow-hidden">
 				{recipe.imageUrl ? (
-					<div className="relative h-48 group overflow-hidden rounded-t-xl border-b border-gray-800">
+					<div className="relative h-48 group overflow-hidden rounded-t-xl border-b border-[var(--border)]">
 						<Image
 							src={recipe.imageUrl}
 							alt="image for recipe"
@@ -49,7 +56,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 					</div>
 				) : (
 					// Изменено: темный фон-заглушка вместо bg-gray-200
-					<div className="w-full h-full bg-[#21262d] flex items-center justify-center rounded-t-xl border-b border-gray-800">
+					<div className="w-full h-full bg-[var(--surface-hover)] flex items-center justify-center rounded-t-xl border-b border-[var(--border)]">
 						<span className="text-gray-400">Нет изображения</span>
 					</div>
 				)}
@@ -72,7 +79,7 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 				<ul className="flex flex-col gap-1.5 mt-2 overflow-y-auto max-h-24 pr-1 list-none">
 					{recipe.ingredients.map((ing) => (
 						// Изменено: убраны дефолтные li стили, добавлен аккуратный темный фон для строк ингредиентов
-						<li key={ing.id} className="bg-[#21262d] px-3 py-1.5 rounded-lg border-l-2 border-[var(--primary)] text-xs flex justify-between">
+						<li key={ing.id} className="bg-[var(--surface-hover)] px-3 py-1.5 rounded-lg border-l-2 border-[var(--primary)] text-xs flex justify-between">
 							<strong className="text-[var(--text)] font-medium">{ing.ingredient?.name}</strong>
 							<span className="text-gray-400">
 								{ing.quantity} {getUnitLabel(ing.ingredient?.unit)}
@@ -82,23 +89,24 @@ const RecipeCard = ({ recipe }: RecipeCardProps) => {
 				</ul>
 			</Card.Content>
 
-			{/* Панель управления кнопками */}
-			<div className="flex justify-end gap-2 p-4 border-t border-gray-800">
-				<Link href={`/recipes/${recipe.id}`}>
-					{/* Изменено: использование основного цвета темы для кнопки редактирования */}
-					<Button variant="ghost" className="bg-[#21262d] text-[var(--primary)] hover:bg-[#30363d]">
-						Редактировать
+			{/* Панель управления кнопками — только для автора рецепта */}
+			{isOwner && (
+				<div className="flex justify-end gap-2 p-4 border-t border-[var(--border)]">
+					<Link href={`/recipes/${recipe.id}`}>
+						<Button variant="ghost" className="bg-[var(--surface)] border border-[var(--border)] text-[var(--primary)] hover:bg-[var(--surface-hover)]">
+							Редактировать
+						</Button>
+					</Link>
+					<Button
+						variant="danger-soft"
+						onPress={handleDelete}
+						isPending={isPending}
+						className="bg-red-50 text-red-600 hover:bg-red-100 border border-red-200"
+					>
+						Удалить
 					</Button>
-				</Link>
-				<Button
-					variant="danger-soft"
-					onPress={handleDelete}
-					isPending={isPending}
-					className="bg-red-950/40 text-red-400 hover:bg-red-900/60 border border-red-900/50"
-				>
-					Удалить
-				</Button>
-			</div>
+				</div>
+			)}
 		</Card>
 	);
 };

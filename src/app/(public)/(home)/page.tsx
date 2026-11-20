@@ -18,18 +18,36 @@ export default function Home() {
 					</Link>
 				</div>
 			) : (
-				<h1 className='text-center text-4xl font-bold !text-red-700 mb-6'>
-					Пожалуйста, зарегистрируйтесь
-				</h1>
+				<p className='text-center text-[var(--text-muted)] mb-6'>
+					Войдите или зарегистрируйтесь, чтобы добавлять рецепты
+				</p>
 			)}
 
 			{error && <p className='text-red-500 mb-4'>{error}</p>}
 
-			{isLoading && <p>Загрузка...</p>}
+			{isLoading && (
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+					{Array.from({ length: 6 }).map((_, index) => (
+						<div
+							key={index}
+							className="h-[480px] rounded-xl bg-[var(--surface)] animate-pulse"
+						/>
+					))}
+				</div>
+			)}
 
-			{/* Добавлен класс mb-16 для отступа сетки от футера */}
+			{!isLoading && !error && recipes.length === 0 && (
+				<div className="flex flex-col items-center gap-2 py-16 mb-16 text-center">
+					<p className="text-xl text-[var(--text)]">Рецептов пока нет</p>
+					<p className="text-sm text-[var(--text-muted)]">
+						{isAuth
+							? "Станьте первым — добавьте рецепт татарской кухни"
+							: "Рецепты появятся после входа"}
+					</p>
+				</div>
+			)}
+
 			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16'>
-				{/* Безопасный рендеринг: проверяем наличие recipe и recipe.id */}
 				{recipes && recipes.map((recipe) => (
 					recipe?.id ? <RecipeCard key={recipe.id} recipe={recipe} /> : null
 				))}

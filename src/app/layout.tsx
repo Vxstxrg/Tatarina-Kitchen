@@ -6,7 +6,6 @@ import Header from "@/components/UI/layout/header/header";
 import Title from "@/components/UI/layout/title/title";
 import AppLoader from "@/hoc/app-loader";
 
-import { Provider } from "@/provider/provider";
 import { siteConfig } from "@/config/site.config";
 import { layoutConfig } from "@/config/layout.config";
 
@@ -41,34 +40,32 @@ export default async function RootLayout({
 			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 		>
 			<body className="min-h-screen flex flex-col">
-				<Provider>
-					<SessionProvider session={session}>
-						<AppLoader>
-							<Header />
+				<SessionProvider session={session}>
+					<AppLoader>
+						<Header />
 
-							<div className="w-full max-w-[1024px] mx-auto px-6">
-								<Title />
-								<main className="min-h-0 flex-1 overflow-hidden">
-									{children}
-								</main>
+						<div className="w-full max-w-[1024px] mx-auto px-6">
+							<Title />
+							<main className="min-h-0 flex-1 overflow-hidden">
+								{children}
+							</main>
+						</div>
+
+						<footer
+							className="mt-auto flex items-center justify-center border-t border-[var(--border)]"
+							style={{
+								backgroundColor:
+									layoutConfig.footer.backgroundColor,
+								color: layoutConfig.footer.textColor,
+								height: layoutConfig.footer.height,
+							}}
+						>
+							<div className="w-full max-w-[1024px] mx-auto px-6 text-center">
+								<p>{siteConfig.description}</p>
 							</div>
-
-							<footer
-								className="mt-auto flex items-center justify-center"
-								style={{
-									backgroundColor:
-										layoutConfig.footer.backgroundColor,
-									color: layoutConfig.footer.textColor,
-									height: layoutConfig.footer.height,
-								}}
-							>
-								<div className="w-full max-w-[1024px] mx-auto px-6 text-center">
-									<p>{siteConfig.description}</p>
-								</div>
-							</footer>
-						</AppLoader>
-					</SessionProvider>
-				</Provider>
+						</footer>
+					</AppLoader>
+				</SessionProvider>
 			</body>
 		</html>
 	);

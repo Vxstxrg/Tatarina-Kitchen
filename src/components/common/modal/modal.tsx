@@ -40,9 +40,9 @@
 					<span key="trigger" className="hidden" aria-hidden="true" />,
 					<ModalBackdrop key="backdrop">
 						<ModalContainer size={size}>
-							<ModalDialog>
-								<ModalHeader className="grid grid-cols-[1fr_auto] items-center gap-2 border-b pb-3">
-									<ModalHeading className="text-md font-semibold !text-black">
+							<ModalDialog className="bg-[var(--surface)] border border-[var(--border)] text-[var(--text)]">
+								<ModalHeader className="grid grid-cols-[1fr_auto] items-center gap-2 border-b border-[var(--border)] pb-3">
+									<ModalHeading className="text-md font-semibold text-[var(--text)]">
 										{title}
 									</ModalHeading>
 

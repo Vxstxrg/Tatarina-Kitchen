@@ -3,13 +3,15 @@ import IngredientForm from "@/forms/ingredient.form";
 
 const IngredientsPage = () => {
 	return (
-		<div className="min-h-screen flex flex-col items-center overflow-y-hidden">
-			<h1 className="mt-8 text-3xl font-bold text-[var(--text)]">
-				Добавление ингредиента
-			</h1>
+		<div className="flex w-full flex-col items-center pb-12">
+			<section className="w-full max-w-3xl bg-[var(--surface)] border border-[var(--border)] p-6 rounded-2xl">
+				<h2 className="text-xl font-semibold text-[var(--text)] mb-6">
+					Новый ингредиент
+				</h2>
+				<IngredientForm />
+			</section>
 
-			<div className="min-h-screen max-w-full overflow-x-hidden flex flex-col items-center bg-[var(--background)] pb-12">
-				<div className="w-full max-w-3xl bg-white p-6 rounded-2xl border border-gray-100 shadow-sm"><IngredientForm /></div>
+			<div className="w-full mt-8">
 				<IngredientsTable />
 			</div>
 		</div>

@@ -26,8 +26,12 @@ export default function LoginForm({ onClose }: IProps) {
 	const [authError, setAuthError] = useState<string | null>(null);
 
 	const [errors, setErrors] = useState<LoginErrors>({});
+	const inputClassName = `w-full rounded-xl bg-[var(--surface)] border border-[var(--border)]
+		px-4 py-3 text-[var(--text)] placeholder:text-[var(--text-muted)]
+		hover:border-[#3d444d] focus:outline-none focus:border-[var(--primary)]
+		transition-colors`;
 	const inputErrorClassName =
-		"border border-red-500 bg-red-50 text-red-900 placeholder:text-red-400";
+		"border-red-400 bg-red-50 text-red-700 placeholder:text-red-400";
 
 	const handleChange =
 		(field: keyof LoginData) =>
@@ -88,13 +92,7 @@ export default function LoginForm({ onClose }: IProps) {
 					onChange={handleChange("email")}
 					placeholder="Введите Email"
 					aria-invalid={Boolean(errors.email)}
-					className={`w-full rounded-xl bg-gray-100 px-4 py-3 text-gray-900
-		placeholder:text-gray-500
-		hover:bg-gray-200
-		focus:bg-gray-100
-		focus:outline-none
-		${errors.email ? inputErrorClassName : ""}
-	`}
+					className={`${inputClassName} ${errors.email ? inputErrorClassName : ""}`}
 				/>
 
 				{errors.email && (
@@ -113,13 +111,7 @@ export default function LoginForm({ onClose }: IProps) {
 					value={formData.password}
 					onChange={handleChange("password")}
 					aria-invalid={Boolean(errors.password)}
-					className={`w-full rounded-xl bg-gray-100 px-4 py-3 text-gray-900
-		placeholder:text-gray-500
-		hover:bg-gray-200
-		focus:bg-gray-100
-		focus:outline-none
-		${errors.password ? inputErrorClassName : ""}
-	`}
+					className={`${inputClassName} ${errors.password ? inputErrorClassName : ""}`}
 				/>
 
 				{errors.password && (

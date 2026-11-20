@@ -14,6 +14,7 @@ const PageContent = () => {
 
 	const cleanHTML = DOMPurify.sanitize(pageContent.content)
 
-	return (<div>{parse(cleanHTML)}</div>);
+	// Класс page-content — якорь для типографики из globals.css
+	return (<div className="page-content">{parse(cleanHTML)}</div>);
 }
 export default PageContent;
