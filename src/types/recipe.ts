@@ -12,5 +12,7 @@ export interface IRecipe {
 	name: string;
 	description: string | null;
 	imageUrl?: string | null;
+	/** Владелец рецепта; null у записей, созданных до появления владения */
+	authorId?: string | null;
 	ingredients: IRecipeIngredient[];
 }

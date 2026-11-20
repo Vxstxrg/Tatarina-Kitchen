@@ -1,144 +1,210 @@
 "use server";
 
-import { prisma } from '@/utils/prisma';
+import { prisma } from "@/utils/prisma";
+import { getAuthUserId } from "@/utils/auth-guard";
+import { MAX_RECIPE_INGREDIENTS, recipeSchema } from "@/schema/zod";
+import type { ActionResult } from "@/types/action-result";
+import type { ActionError } from "@/types/action-result";
+import type { IRecipe } from "@/types/recipe";
 
-export async function getRecipes() {
+const UNAUTHORIZED: ActionError = {
+	success: false,
+	error: "Требуется авторизация",
+};
+
+const NOT_AUTHOR: ActionError = {
+	success: false,
+	error: "Вы не автор этого рецепта",
+};
+
+/**
+ * Проверяет, что текущий пользователь — владелец рецепта.
+ * Рецепты без владельца (созданные до введения владения) никому не доступны для изменения.
+ */
+async function assertRecipeOwner(
+	recipeId: string,
+	userId: string,
+): Promise<ActionError | null> {
+	const recipe = await prisma.recipe.findUnique({
+		where: { id: recipeId },
+		select: { authorId: true },
+	});
+
+	if (!recipe) {
+		return { success: false, error: "Рецепт не найден" };
+	}
+
+	if (recipe.authorId !== userId) {
+		return NOT_AUTHOR;
+	}
+
+	return null;
+}
+
+/**
+ * Собирает данные рецепта из FormData.
+ * Поля ингредиентов приходят парами ingredient_${index} / quantity_${index}.
+ * Строки с невыбранным ингредиентом отбрасываются.
+ */
+function parseRecipeForm(formData: FormData) {
+	const ingredients = Array.from({ length: MAX_RECIPE_INGREDIENTS }, (_, index) => ({
+		ingredientId: formData.get(`ingredient_${index}`),
+		quantity: formData.get(`quantity_${index}`),
+	})).filter(
+		(item) => typeof item.ingredientId === "string" && item.ingredientId !== "",
+	);
+
+	return {
+		name: formData.get("name"),
+		description: formData.get("description"),
+		imageUrl: formData.get("imageUrl"),
+		ingredients: ingredients.map((item) => ({
+			ingredientId: item.ingredientId,
+			// Пустое поле количества приходит как null, Number(null) === 0 — не годится
+			quantity: item.quantity === null ? Number.NaN : Number(item.quantity),
+		})),
+	};
+}
+
+export async function getRecipes(): Promise<ActionResult<IRecipe[]>> {
 	try {
-		const recipes = await prisma.recipe.findMany({
+		// $extends(withAccelerate) стирает типы include, поэтому явный каст
+		const recipes = (await prisma.recipe.findMany({
+			orderBy: { name: "asc" },
 			include: {
 				ingredients: {
 					include: {
-						ingredient: true
-					}
-				}
-			}
-		});
-		return { success: true, recipes };
+						ingredient: true,
+					},
+				},
+			},
+		})) as unknown as IRecipe[];
+
+		return { success: true, data: recipes };
 	} catch (error) {
-		console.error("ошибка получение рецептов:", error);
-		return { success: false, error: "Ошибка при загрузке рецептов" };
+		console.error("getRecipes:", error);
+		return { success: false, error: "Не удалось загрузить рецепты" };
 	}
 }
 
-export async function createRecipe(formData: FormData) {
+export async function createRecipe(
+	formData: FormData,
+): Promise<ActionResult<IRecipe>> {
+	const userId = await getAuthUserId();
+	if (!userId) return UNAUTHORIZED;
+
+	const parsed = recipeSchema.safeParse(parseRecipeForm(formData));
+	if (!parsed.success) {
+		return {
+			success: false,
+			error: parsed.error.issues[0]?.message ?? "Проверьте поля формы",
+		};
+	}
+
+	const { name, description, imageUrl, ingredients } = parsed.data;
+
 	try {
-		const name = formData.get("name") as string;
-		const description = formData.get("description") as string;
-		const imageUrl = formData.get("imageUrl") as string | null;
-
-		const ingredients = Array.from(formData.entries())
-			.filter(([key]) => key.startsWith("ingredient_"))
-			.map(([key, value]) => ({
-				ingredientId: value as string,
-				quantity: parseFloat(
-					formData.get(`quantity_${key.split("_")[1]}`) as string,
-				)
-			}));
-
-		if (!name || ingredients.length === 0) {
-			return {
-				success: false,
-				error: "Имя и хотя бы один ингредиент обязателен"
-			};
-		}
-
 		const recipe = await prisma.recipe.create({
 			data: {
 				name,
-				description,
+				description: description || "",
 				imageUrl,
+				authorId: userId,
 				ingredients: {
 					create: ingredients.map(({ ingredientId, quantity }) => ({
-						// Исправлено: связываем через прямой ID промежуточной таблицы
 						ingredientId,
-						quantity
-					}))
-				}
+						quantity,
+					})),
+				},
 			},
 			include: {
 				ingredients: {
 					include: {
-						ingredient: true
-					}
-				}
-			}
-		});
-
-		return { success: true, data: recipe };
-	} catch (error) {
-		console.error("Error creating recipe:", error);
-		return { success: false, error: "Ошибка при создании рецепта" };
-	}
-}
-
-export async function updateRecipe(id: string, formData: FormData) {
-	try {
-		const name = formData.get("name") as string;
-		const description = formData.get("description") as string;
-		const imageUrl = formData.get("imageUrl") as string | null;
-
-		const ingredients = Array.from(formData.entries())
-			.filter(([key]) => key.startsWith("ingredient_"))
-			.map(([key, value]) => ({
-				ingredientId: value as string,
-				quantity: parseFloat(
-					formData.get(`quantity_${key.split("_")[1]}`) as string,
-				)
-			}));
-
-		if (!name || ingredients.length === 0) {
-			return {
-				success: false,
-				error: "Имя и хотя бы один ингредиент обязателен"
-			};
-		}
-
-		const recipe = await prisma.recipe.update({
-			where: { id },
-			data: {
-				name,
-				description,
-				imageUrl,
-				ingredients: {
-					deleteMany: {},
-					create: ingredients.map(({ ingredientId, quantity }) => ({
-						// Исправлено: аналогично createRecipe
-						ingredientId,
-						quantity
-					}))
-				}
+						ingredient: true,
+					},
+				},
 			},
-			include: {
-				ingredients: {
-					include: {
-						ingredient: true
-					}
-				}
-			}
 		});
+
 		return { success: true, data: recipe };
 	} catch (error) {
-		console.error("error updating recipe", error);
-		return { success: false, error: "Ошибка при обновлении рецепта" };
+		console.error("createRecipe:", error);
+		return { success: false, error: "Не удалось создать рецепт" };
 	}
 }
 
-export async function deleteRecipe(id: string) {
+export async function updateRecipe(
+	id: string,
+	formData: FormData,
+): Promise<ActionResult<IRecipe>> {
+	const userId = await getAuthUserId();
+	if (!userId) return UNAUTHORIZED;
+
+	const parsed = recipeSchema.safeParse(parseRecipeForm(formData));
+	if (!parsed.success) {
+		return {
+			success: false,
+			error: parsed.error.issues[0]?.message ?? "Проверьте поля формы",
+		};
+	}
+
+	const { name, description, imageUrl, ingredients } = parsed.data;
+
 	try {
-		// Очищаем связи в связующей таблице
-		await prisma.recipeIngredient.deleteMany({
-			where: { recipeId: id }
-		});
+		const ownershipError = await assertRecipeOwner(id, userId);
+		if (ownershipError) return ownershipError;
 
-		// Удаляем сам рецепт
-		await prisma.recipe.delete({
-			where: { id }
-		});
+		// Замена состава ингредиентов и обновление рецепта — одна транзакция,
+		// чтобы не осталось рецепта без ингредиентов при сбое посередине
+		const [, recipe] = await prisma.$transaction([
+			prisma.recipeIngredient.deleteMany({ where: { recipeId: id } }),
+			prisma.recipe.update({
+				where: { id },
+				data: {
+					name,
+					description: description || "",
+					imageUrl,
+					ingredients: {
+						create: ingredients.map(({ ingredientId, quantity }) => ({
+							ingredientId,
+							quantity,
+						})),
+					},
+				},
+				include: {
+					ingredients: {
+						include: {
+							ingredient: true,
+						},
+					},
+				},
+			}),
+		]);
 
-		// Исправлено: добавлен обязательный возврат статуса операции
+		return { success: true, data: recipe };
+	} catch (error) {
+		console.error("updateRecipe:", error);
+		return { success: false, error: "Не удалось обновить рецепт" };
+	}
+}
+
+export async function deleteRecipe(id: string): Promise<ActionResult> {
+	const userId = await getAuthUserId();
+	if (!userId) return UNAUTHORIZED;
+
+	try {
+		const ownershipError = await assertRecipeOwner(id, userId);
+		if (ownershipError) return ownershipError;
+
+		// Связи удаляем в одной транзакции с рецептом
+		await prisma.$transaction([
+			prisma.recipeIngredient.deleteMany({ where: { recipeId: id } }),
+			prisma.recipe.delete({ where: { id } }),
+		]);
+
 		return { success: true };
 	} catch (error) {
-		console.error("Error deleting recipe", error);
-		return { success: false, error: "Ошибка при удалении рецепта" };
+		console.error("deleteRecipe:", error);
+		return { success: false, error: "Не удалось удалить рецепт" };
 	}
 }

@@ -1,18 +1,20 @@
-"use server"
-import { IFormData } from "../types/form-data";
+"use server";
+
 import { prisma } from "@/utils/prisma";
 import { saltAndHashPassword } from "@/utils/password";
+import { registerSchema } from "@/schema/zod";
+import type { IFormData } from "@/types/form-data";
 
 export async function registerUser(formData: IFormData) {
-	const { email, password, confirmPassword } = formData;
-
-	if (password !== confirmPassword) {
-		return { success: false, error: "Пароли не совпадают" };
+	const parsed = registerSchema.safeParse(formData);
+	if (!parsed.success) {
+		return {
+			success: false,
+			error: parsed.error.issues[0]?.message ?? "Проверьте поля формы",
+		};
 	}
 
-	if (password.length < 6) {
-		return { success: false, error: "Пароль должен быть длиной не менее 6 символов" };
-	}
+	const { email, password } = parsed.data;
 
 	try {
 		const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -20,28 +22,18 @@ export async function registerUser(formData: IFormData) {
 			return { success: false, error: "Пользователь с таким Email уже существует" };
 		}
 
-		const pwHash = await saltAndHashPassword(password);
+		const passwordHash = await saltAndHashPassword(password);
 
-		const user = await prisma.user.create({
+		await prisma.user.create({
 			data: {
-				email: email,
-				password: pwHash,
+				email,
+				password: passwordHash,
 			},
 		});
 
-		console.log("✅ [SERVER] Пользователь успешно создан:", user.email);
-
-		// Возвращаем объект без хэша пароля для безопасности UI
-		return {
-			success: true,
-			user: {
-				id: user.id,
-				email: user.email
-			}
-		};
-
+		return { success: true };
 	} catch (error) {
-		console.error("❌ [SERVER] Error creating user:", error);
+		console.error("registerUser:", error);
 		return { success: false, error: "Ошибка при создании пользователя" };
 	}
 }

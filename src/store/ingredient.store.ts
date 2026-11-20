@@ -1,16 +1,17 @@
-import { createIngredient, deleteIngredient, getIngredients } from '@/actions/ingredient';
-import { IIngredient } from '@/types/ingredient';
-import { create } from 'zustand';
-
-const getErrorMessage = (value: unknown, fallback: string) =>
-	typeof value === "string" ? value : fallback;
+import {
+	createIngredient,
+	deleteIngredient,
+	getIngredients,
+} from "@/actions/ingredient";
+import { IIngredient } from "@/types/ingredient";
+import { create } from "zustand";
 
 interface IngredientState {
 	ingredients: IIngredient[];
 	isLoading: boolean;
 	error: string | null;
 	loadIngredients: () => Promise<void>;
-	addIngredient: (formData: unknown) => Promise<void>;
+	addIngredient: (formData: unknown) => Promise<boolean>;
 	removeIngredient: (id: string) => Promise<void>;
 }
 
@@ -19,72 +20,61 @@ export const useIngredientStore = create<IngredientState>((set) => ({
 	isLoading: false,
 	error: null,
 
-
 	loadIngredients: async () => {
 		set({ isLoading: true, error: null });
 		try {
-			const result = await getIngredients()
-			if (result.success && result.ingredients) {
-				set({ ingredients: result.ingredients, isLoading: false })
-			}
-			else {
-				const message = "error" in result
-					? getErrorMessage(result.error, "Ошибка при загрузке ингредиентов")
-					: "Ошибка при загрузке ингредиентов";
-				set({ error: message, isLoading: false })
+			const result = await getIngredients();
+			if (result.success) {
+				set({ ingredients: result.data, isLoading: false });
+			} else {
+				set({ error: result.error, isLoading: false });
 			}
 		} catch (error) {
-			console.log("error", error);
-			set({ error: "Ошибка при загрузке ингредиентов", isLoading: false })
+			console.error("loadIngredients:", error);
+			set({ error: "Ошибка при загрузке ингредиентов", isLoading: false });
 		}
 	},
 
-	addIngredient: async (formdata: unknown) => {
+	addIngredient: async (formData) => {
 		set({ isLoading: true, error: null });
 		try {
-			const result = await createIngredient(formdata)
+			const result = await createIngredient(formData);
 
-			if (result.success && result.ingredient) {
+			if (result.success) {
 				set((state) => ({
-					ingredients: [...state.ingredients, result.ingredient],
-					isLoading: false
+					ingredients: [...state.ingredients, result.data],
+					isLoading: false,
 				}));
-			} else {
-				const message = "error" in result
-					? getErrorMessage(result.error, "Ошибка при добавлении ингредиента")
-					: "Ошибка при добавлении ингредиента";
-				set({ error: message, isLoading: false })
+				return true;
 			}
+
+			set({ error: result.error, isLoading: false });
+			return false;
 		} catch (error) {
-			console.log("error", error);
-			set({ error: "Ошибка при получении ингредиентов", isLoading: false })
+			console.error("addIngredient:", error);
+			set({ error: "Ошибка при добавлении ингредиента", isLoading: false });
+			return false;
 		}
 	},
 
-	removeIngredient: async (id: string) => {
+	removeIngredient: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
 			const result = await deleteIngredient(id);
 
-
 			if (result.success) {
 				set((state) => ({
 					ingredients: state.ingredients.filter(
-						(ingredient) => ingredient.id !== id
+						(ingredient) => ingredient.id !== id,
 					),
-					isLoading: false
-				}))
+					isLoading: false,
+				}));
+			} else {
+				set({ error: result.error, isLoading: false });
 			}
-			else {
-				const message = "error" in result
-					? getErrorMessage(result.error, "Ошибка при удалении ингредиента")
-					: "Ошибка при удалении ингредиента";
-				set({ error: message, isLoading: false })
-			}
-
 		} catch (error) {
-			console.log("error", error);
-			set({ error: "Ошибка при удалении ингредиента", isLoading: false })
+			console.error("removeIngredient:", error);
+			set({ error: "Ошибка при удалении ингредиента", isLoading: false });
 		}
-	}
+	},
 }));

@@ -2,13 +2,10 @@ import {
 	createRecipe,
 	deleteRecipe,
 	getRecipes,
-	updateRecipe as updateRecipeAction
-} from '@/actions/recipe';
-import { IRecipe } from '@/types/recipe';
-import { create } from 'zustand';
-
-const getErrorMessage = (value: unknown, fallback: string) =>
-	typeof value === "string" ? value : fallback;
+	updateRecipe as updateRecipeAction,
+} from "@/actions/recipe";
+import { IRecipe } from "@/types/recipe";
+import { create } from "zustand";
 
 interface IActionResult {
 	success: boolean;
@@ -19,6 +16,8 @@ interface IActionResult {
 interface IRecipeState {
 	recipes: IRecipe[];
 	isLoading: boolean;
+	/** true после первой успешной (пусть и пустой) загрузки списка */
+	isLoaded: boolean;
 	error: string | null;
 	loadRecipes: () => Promise<void>;
 	addRecipe: (formData: FormData) => Promise<IActionResult>;
@@ -29,93 +28,97 @@ interface IRecipeState {
 export const useRecipeStore = create<IRecipeState>((set) => ({
 	recipes: [],
 	isLoading: false,
+	isLoaded: false,
 	error: null,
 
 	loadRecipes: async () => {
 		set({ isLoading: true, error: null });
 		try {
 			const result = await getRecipes();
-			if (result.success && Array.isArray(result.recipes)) {
-				// ИСПРАВЛЕНО: гарантируем, что в стейт попадёт только массив. Никаких строк!
-				set({ recipes: result.recipes, isLoading: false });
+			if (result.success) {
+				set({ recipes: result.data, isLoaded: true, isLoading: false });
 			} else {
 				set({
-					error: result.error || "Не удалось загрузить рецепты",
-					recipes: [], // Защита: сбрасываем в пустой массив при ошибке
-					isLoading: false
+					error: result.error,
+					recipes: [],
+					isLoaded: true,
+					isLoading: false,
 				});
 			}
 		} catch (error) {
-			console.error("error", error);
-			set({ error: "Ошибка при загрузке рецептов", recipes: [], isLoading: false });
+			console.error("loadRecipes:", error);
+			set({
+				error: "Ошибка при загрузке рецептов",
+				recipes: [],
+				isLoaded: true,
+				isLoading: false,
+			});
 		}
 	},
 
-	addRecipe: async (formData: FormData) => {
+	addRecipe: async (formData) => {
 		set({ isLoading: true, error: null });
 
 		try {
 			const result = await createRecipe(formData);
-			if (result.success && result.data) {
+			if (result.success) {
 				set((state) => ({
 					recipes: [...state.recipes, result.data],
-					isLoading: false
+					isLoading: false,
 				}));
 				return { success: true, recipe: result.data };
-			} else {
-				const message = getErrorMessage(result.error, "Не удалось добавить рецепт");
-				set({ error: message, isLoading: false });
-				return { success: false, error: message };
 			}
+
+			set({ error: result.error, isLoading: false });
+			return { success: false, error: result.error };
 		} catch (error) {
-			console.error("error", error);
+			console.error("addRecipe:", error);
 			set({ error: "Ошибка при добавлении рецепта", isLoading: false });
 			return { success: false, error: "Ошибка при добавлении рецепта" };
 		}
 	},
 
-	updateRecipe: async (id: string, formData: FormData) => {
+	updateRecipe: async (id, formData) => {
 		set({ isLoading: true, error: null });
 
 		try {
 			const result = await updateRecipeAction(id, formData);
-			if (result.success && result.data) {
+			if (result.success) {
 				set((state) => ({
 					recipes: state.recipes.map((recipe) =>
-						recipe && recipe.id === id ? result.data : recipe
+						recipe && recipe.id === id ? result.data : recipe,
 					),
-					isLoading: false
+					isLoading: false,
 				}));
 				return { success: true, recipe: result.data };
-			} else {
-				const message = getErrorMessage(result.error, "Не удалось обновить рецепт");
-				set({ error: message, isLoading: false });
-				return { success: false, error: message };
 			}
+
+			set({ error: result.error, isLoading: false });
+			return { success: false, error: result.error };
 		} catch (error) {
-			console.error("error", error);
+			console.error("updateRecipe:", error);
 			set({ error: "Ошибка при обновлении рецепта", isLoading: false });
 			return { success: false, error: "Ошибка при обновлении рецепта" };
 		}
 	},
 
-	removeRecipe: async (id: string) => {
+	removeRecipe: async (id) => {
 		set({ isLoading: true, error: null });
 
 		try {
 			const result = await deleteRecipe(id);
 
-			if (result?.success) {
+			if (result.success) {
 				set((state) => ({
 					recipes: state.recipes.filter((recipe) => recipe && recipe.id !== id),
-					isLoading: false
+					isLoading: false,
 				}));
 			} else {
-				set({ error: result?.error || "Не удалось удалить рецепт", isLoading: false });
+				set({ error: result.error, isLoading: false });
 			}
 		} catch (error) {
-			console.error("error", error);
-			set({ error: "Ошибка при удалении рецептов", isLoading: false });
+			console.error("removeRecipe:", error);
+			set({ error: "Ошибка при удалении рецепта", isLoading: false });
 		}
 	},
 }));
